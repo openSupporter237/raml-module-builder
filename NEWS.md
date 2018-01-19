@@ -1,3 +1,7 @@
+## 17.1.0 Unreleased
+
+* RMB-126: Allow for filtering using a view, and selecting records from a table
+
 ## 17.0.0 2017-01-17
 * RMB-119: CQL's default relation "=" now uses "adj" relation for strings (was "all")
 * CQLPG-30, CQLPG-31: Fix number handling in CQL queries
