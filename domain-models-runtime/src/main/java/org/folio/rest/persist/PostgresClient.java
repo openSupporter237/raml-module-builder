@@ -1092,6 +1092,111 @@ public class PostgresClient {
     });
   }
 
+  public void getUsingView(
+    String table,
+    String view,
+    Class<?> clazz,
+    String fieldName,
+    String where,
+    String orderBy,
+    boolean returnCount,
+    boolean returnIdField,
+    boolean setId,
+    Handler<AsyncResult<Results>> replyHandler) throws Exception {
+
+    long start = System.nanoTime();
+
+    client.getConnection(res -> {
+      if (res.succeeded()) {
+        SQLConnection connection = res.result();
+        try {
+          String addIdField = "";
+          if(returnIdField){
+            addIdField = "," + idField;
+          }
+
+          String select = "SELECT ";
+
+          if(!"null".equals(fieldName) && fieldName.contains("*")) {
+            //if we are requesting all fields (*) , then dont add the id field to the select
+            //this will return two id columns which will create ambiguity in facet queries
+            addIdField = "";
+          }
+
+          String []q;
+
+          if(StringUtils.isEmpty(where)) {
+            q = new String[]{
+              select + fieldName + addIdField +
+                " FROM " + convertToPsqlStandard(tenantId) + "." + table
+                + " " + orderBy
+            };
+          }
+          else {
+            q = new String[] {
+              select + fieldName + addIdField + " FROM " + convertToPsqlStandard(tenantId) + "." + table
+                + " " + "WHERE " + idField +
+                " IN (SELECT " + idField + " FROM " + convertToPsqlStandard(tenantId) + "." + view
+                + where + ") " + orderBy
+            };
+          }
+
+          log.info("basic query = " + q[0]);
+
+          ParsedQuery parsedQuery = null;
+
+          if(returnCount){
+            parsedQuery = parseQuery(q[0]);
+          }
+
+          if (returnCount) {
+            //optimize the entire query building process needed!!
+            Map<String, String> replaceMapping = new HashMap<>();
+            replaceMapping.put("tenantId", convertToPsqlStandard(tenantId));
+            replaceMapping.put("query",
+              org.apache.commons.lang.StringEscapeUtils.escapeSql(
+                parsedQuery.getCountFuncQuery()));
+            StrSubstitutor sub = new StrSubstitutor(replaceMapping);
+            q[0] = select +
+              sub.replace(countClauseTemplate) + q[0].replaceFirst(select , " ");
+          }
+
+          log.info("query = " + q[0]);
+          connection.query(q[0],
+            query -> {
+              connection.close();
+              try {
+                if (query.failed()) {
+                  log.error(query.cause().getMessage(), query.cause());
+                  replyHandler.handle(Future.failedFuture(query.cause()));
+                } else {
+                  replyHandler.handle(Future.succeededFuture(processResult(query.result(), clazz, returnCount, setId)));
+                }
+                long end = System.nanoTime();
+                StatsTracker.addStatElement(STATS_KEY+".get", (end-start));
+                if(log.isDebugEnabled()){
+                  log.debug("timer: get " +q[0]+ " (ns) " + (end-start));
+                }
+              } catch (Exception e) {
+                e.printStackTrace();
+                replyHandler.handle(Future.failedFuture(e.getCause()));
+              }
+            });
+        } catch (Exception e) {
+          if(connection != null){
+            connection.close();
+          }
+          log.error(e.getMessage(), e);
+          replyHandler.handle(Future.failedFuture(e));
+        }
+
+      } else {
+        log.error(res.cause().getMessage(), res.cause());
+        replyHandler.handle(Future.failedFuture(res.cause()));
+      }
+    });
+  }
+
   /**
    * function uses freemarker templating, the template will be loaded the first time
    * should take about 70-80 milli - after that the template gets cached and will be sub milli
