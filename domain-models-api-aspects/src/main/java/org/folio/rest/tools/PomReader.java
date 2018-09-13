@@ -43,7 +43,7 @@ public enum PomReader {
           PomReader.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
       System.out.println(currentRunningJar);
       if(currentRunningJar != null && (currentRunningJar.contains("domain-models-runtime")
-          || currentRunningJar.contains("domain-models-interface-extensions"))){
+          || currentRunningJar.contains("domain-models-api-aspects"))){
         //the runtime is the jar run when deploying during unit tests
         //the interface-extensions is the jar run when running build time tools,
         //like MDGenerator, ClientGenerator, etc..

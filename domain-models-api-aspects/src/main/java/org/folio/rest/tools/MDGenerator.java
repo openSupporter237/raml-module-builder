@@ -10,6 +10,8 @@ import com.google.common.io.Files;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.folio.rest.tools.AnnotationGrabber;
+import org.folio.rest.tools.PomReader;
 
 /**
  * Current generates the following:

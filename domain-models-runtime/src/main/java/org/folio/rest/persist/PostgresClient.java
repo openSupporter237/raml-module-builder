@@ -50,6 +50,8 @@ import org.folio.rest.tools.utils.ResourceUtils;
 import org.postgresql.copy.CopyManager;
 import org.postgresql.core.BaseConnection;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
@@ -1188,7 +1190,7 @@ public class PostgresClient {
           Map<String, String> replaceMapping = new HashMap<>();
           replaceMapping.put("tenantId", convertToPsqlStandard(tenantId));
           replaceMapping.put("query",
-            org.apache.commons.lang.StringEscapeUtils.escapeSql(
+            StringEscapeUtils.escapeSql(
               parsedQuery.getCountFuncQuery()));
           StrSubstitutor sub = new StrSubstitutor(replaceMapping);
           q[0] = SELECT + fieldName + addIdField + "," + sub.replace(countClauseTemplate) + from2where;

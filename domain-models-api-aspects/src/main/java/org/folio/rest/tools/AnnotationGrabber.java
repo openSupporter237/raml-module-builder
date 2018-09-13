@@ -29,6 +29,9 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.folio.rest.tools.ClientGenerator;
+import org.folio.rest.tools.MDGenerator;
+import org.folio.rest.tools.RTFConsts;
 
 public class AnnotationGrabber {
   public static final String  DELIMITER              = "&!!&";
