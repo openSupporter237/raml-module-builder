@@ -31,6 +31,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import java.util.LinkedList;
 
 public class AnnotationGrabber {
   public static final String  DELIMITER              = "&!!&";
@@ -87,19 +88,16 @@ public class AnnotationGrabber {
 
     // get classes in generated package
     ClassPath classPath = ClassPath.from(Thread.currentThread().getContextClassLoader());
-    ImmutableSet<ClassPath.ClassInfo> classes = classPath.getTopLevelClasses(RTFConsts.INTERFACE_PACKAGE);
-    Collection<Object> classNames = Collections2.transform(classes, new Function<ClassPath.ClassInfo, Object>() {
-      @Override
-      public Object apply(ClassPath.ClassInfo input) {
-        log.info("Mapping functions in " + input.getName() +" class to appropriate urls");
-        return input.getName(); // not needed - dont need transform function,
-                                // remove
+    List<ClassPath.ClassInfo> bClasses = new LinkedList<>();
+    ImmutableSet<ClassPath.ClassInfo> aClasses = classPath.getAllClasses();
+    aClasses.forEach(val -> {
+      if (val.getPackageName().equals(RTFConsts.INTERFACE_PACKAGE)) {
+        bClasses.add(val);
       }
     });
     // loop over all the classes from the package
-    classNames.forEach(val -> {
+    bClasses.forEach(val -> {
       try {
-
         ClientGenerator cGen = new ClientGenerator();
 
         // ----------------- class level annotations -----------------------//

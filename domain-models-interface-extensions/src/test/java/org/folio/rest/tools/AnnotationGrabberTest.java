@@ -16,7 +16,7 @@ public class AnnotationGrabberTest {
   @Test
   void generateMappings() throws Exception {
     JsonObject mappings = AnnotationGrabber.generateMappings();
-    log.debug(mappings.encodePrettily());
+    log.info(mappings.encodePrettily());
     JsonObject unittests = mappings.getJsonObject("^unittests");
     assertThat(unittests.getString("class"), is("org.folio.rest.jaxrs.resource.TestResource"));
     JsonArray books = unittests.getJsonArray("^unittestsbooks/?$");
