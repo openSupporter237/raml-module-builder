@@ -12,6 +12,7 @@ import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -59,7 +60,7 @@ public class SchemaDereferencer {
     if (file != null && !hasUriScheme(file)) {
       Path nPath = path.resolveSibling(file);
       try {
-        URI u = new URI("file", nPath.toAbsolutePath().normalize().toString(), null);
+        URI u = new URI("file", nPath.toAbsolutePath().normalize().toString().replace(File.separator, "/"), null);
         jsonObject.put("$ref", u.toString());
       } catch (URISyntaxException ex) {
         throw new IOException(ex.getLocalizedMessage());
